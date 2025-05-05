@@ -93,6 +93,45 @@ python generate_views.py \
 
 Make sure the `--polar`, `--azimuth`, and `--radius` lists have the same number of elements.
 
+#### NeRF Dataset Generation
+
+You can also use the `generate_nerf_views.py` script to automatically generate a complete dataset suitable for NeRF training:
+
+```bash
+python generate_nerf_views.py \
+    --input input/your_object.png \
+    --ckpt 105000.ckpt \
+    --config configs/sd-objaverse-finetune-c_concat-256.yaml \
+    --output_dir nerf_dataset_output \
+    --num_views 120 \
+    --H 256 \
+    --W 256 \
+    --device cuda:0
+```
+
+**Key features:**
+- Automatically calculates camera poses for each generated view
+- Creates a NeRF-compatible dataset structure with sequential image files and a `transforms.json` file
+- Distributes viewpoints around the object to maximize coverage
+
+**Key parameters:**
+- `--num_views`: Number of views to generate (100-200 recommended for NeRF)
+- `--upper_views_only`: Add this flag to generate only views from the upper hemisphere (useful for objects on a surface)
+- `--radius`: Radius value for camera placement
+- `--focal_length`: Focal length in pixels (if not provided, estimated based on image width)
+
+The script creates a timestamped directory containing:
+```
+nerf_dataset_output/20230505_120000/
+├── images/
+│   ├── 0000.png
+│   ├── 0001.png
+│   └── ...
+└── transforms.json
+```
+
+This dataset format is compatible with popular NeRF implementations like [Instant-NGP](https://github.com/NVlabs/instant-ngp), [Nerfstudio](https://github.com/nerfstudio-project/nerfstudio), and [NeRF-pytorch](https://github.com/yenchenlin/nerf-pytorch).
+
 ### Training Script (preliminary)
 
 Download image-conditioned stable diffusion checkpoint released by [Lambda Labs](https://huggingface.co/spaces/lambdalabs/stable-diffusion-image-variations):  

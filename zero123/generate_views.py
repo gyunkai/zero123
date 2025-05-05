@@ -9,6 +9,7 @@ from einops import rearrange
 from torchvision import transforms
 from contextlib import nullcontext
 from torch import autocast
+from datetime import datetime
 
 # Assuming these modules are accessible from the stable-diffusion directory
 from ldm.util import instantiate_from_config, load_and_preprocess, create_carvekit_interface
@@ -139,6 +140,13 @@ def main():
     
     args = parser.parse_args()
 
+    # --- Get Timestamp for unique filenames ---
+    # --- Create Unique Output Subdirectory ---
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    run_output_dir = os.path.join(args.output_dir, timestamp)
+    os.makedirs(run_output_dir, exist_ok=True)
+    print(f"Saving outputs to: {run_output_dir}")
+
     # --- Sanity Checks ---
     if len(args.polar) != len(args.azimuth) or len(args.polar) != len(args.radius):
         raise ValueError("Lists for --polar, --azimuth, and --radius must have the same length.")
@@ -185,13 +193,14 @@ def main():
             sample_np = 255.0 * rearrange(sample_tensor.cpu().numpy(), 'c h w -> h w c')
             output_im = Image.fromarray(sample_np.astype(np.uint8))
             
-            # Construct filename
-            filename = f"view_{i+1:03d}_p{polar:+04.0f}_a{azimuth:+04.0f}_r{radius:.2f}"
+            # Construct filename with timestamp
+            base_filename = f"view_{i+1:03d}_p{polar:+04.0f}_a{azimuth:+04.0f}_r{radius:.2f}"
             if args.n_samples > 1:
-                filename += f"_sample{j+1:02d}"
-            filename += ".png"
+                filename = f"{base_filename}_sample{j+1:02d}.png"
+            else:
+                filename = f"{base_filename}.png"
             
-            output_path = os.path.join(args.output_dir, filename)
+            output_path = os.path.join(run_output_dir, filename)
             output_im.save(output_path)
             print(f"Saved: {output_path}")
 
