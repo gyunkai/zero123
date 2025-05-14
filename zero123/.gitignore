@@ -21,3 +21,4 @@ datasets
 scratch/
 generated_images/
 nerf_dataset_output/
+neus2_dataset/

@@ -36,7 +36,7 @@ near_view_weight: 10000.0
 depth_weight: 0
 var_red: true
 train_view: true
-scene: pikachu
+scene: lysol
 index: 0
 view_weight: 10000
 prefix: experiments/exp_wild
